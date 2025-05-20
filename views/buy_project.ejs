@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if (project) { %>
+        <title>Buy <%= project.originalZipName.replace(/\.zip$/i, '') %> - BuyMeACode</title>
+    <% } else { %>
+        <title>Project Not Found - BuyMeACode</title>
+    <% } %>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4 md:p-8 max-w-2xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-600">BuyMeACode</h1>
+        </header>
+
+        <% if (project) { %>
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-3"><%= project.originalZipName.replace(/\.zip$/i, '') %></h2>
+                <p class="text-md text-gray-600 mb-1">By: <span class="font-medium"><%= project.developerName %></span></p>
+                <p class="text-md text-gray-600 mb-4">
+                    Live Demo: <a href="<%= project.websiteUrl %>" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline"><%= project.websiteUrl %></a>
+                </p>
+
+                <div class="my-6 py-4 border-t border-b border-gray-200">
+                    <p class="text-2xl font-bold text-green-600 text-center">Price: $<%= (project.priceInCents / 100).toFixed(2) %></p>
+                </div>
+
+                <button id="pay-button" data-project-id="<%= project.id %>"
+                        class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg focus:outline-none focus:shadow-outline">
+                    Pay $<%= (project.priceInCents / 100).toFixed(2) %> to Download
+                </button>
+                 <p class="text-xs text-gray-500 mt-4 text-center">You will be redirected to Stripe for secure payment.</p>
+            </div>
+        <% } else { %>
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg text-center">
+                <h2 class="text-2xl font-semibold text-red-600 mb-4">Project Not Found</h2>
+                <p class="text-gray-700">The project you are looking for does not exist or may have been removed.</p>
+                <a href="/" class="mt-6 inline-block text-blue-500 hover:underline">Back to Home</a>
+            </div>
+        <% } %>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>© 2024 BuyMeACode. A demo project.</p>
+        </footer>
+    </div>
+
+    <% if (project) { %>
+    <script>
+        const stripe = Stripe('<%= stripePublishableKey %>'); // Passed from backend
+        const payButton = document.getElementById('pay-button');
+
+        if (payButton) {
+            payButton.addEventListener('click', async () => {
+                const projectId = payButton.dataset.projectId;
+                try {
+                    // No need to send amount, backend uses stored price
+                    const response = await fetch(`/create-checkout-session/${projectId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Checkout creation failed: ${response.statusText}`);
+                    }
+                    const session = await response.json();
+                    const result = await stripe.redirectToCheckout({ sessionId: session.id });
+                    if (result.error) {
+                        console.error(result.error.message);
+                        alert("Error redirecting to checkout: " + result.error.message);
+                    }
+                } catch (error) {
+                    console.error('Error setting up Stripe Checkout:', error);
+                    alert("Could not initiate payment. " + error.message);
+                }
+            });
+        }
+    </script>
+    <% } %>
+</body>
+</html>

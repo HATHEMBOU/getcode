@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled - BuyMeACode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-4 md:p-8 max-w-lg text-center">
+        <div class="bg-white p-6 md:p-10 rounded-lg shadow-xl">
+            <svg class="text-red-500 w-16 h-16 mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h1 class="text-3xl font-bold text-gray-800 mb-3">Payment Cancelled</h1>
+            <p class="text-gray-600 mb-6" id="cancel-message">Your payment was not completed. You have not been charged.</p>
+
+            <a href="/"
+               class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg inline-block shadow-md transition duration-150 ease-in-out">
+                Back to Project Listings
+            </a>
+        </div>
+         <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>© 2024 BuyMeACode. A demo project.</p>
+        </footer>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const reason = params.get('reason');
+        const messageEl = document.getElementById('cancel-message');
+        if (reason === 'payment_not_confirmed') {
+            messageEl.textContent = "Your payment could not be confirmed. Please try again or contact support if the issue persists.";
+        }
+    </script>
+</body>
+</html>

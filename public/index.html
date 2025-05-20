@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Website Source Code - BuyMeACode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 font-sans min-h-screen">
+    <nav class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 md:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-code text-blue-600 text-2xl"></i>
+                <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">BuyMeACode</h1>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition"><i class="fas fa-search mr-1"></i> Browse</a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition"><i class="fas fa-info-circle mr-1"></i> About</a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition"><i class="fas fa-question-circle mr-1"></i> Help</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-12 text-center py-12">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4">Discover Quality <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Source Code</span></h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Purchase website source code from talented developers around the world.</p>
+            <a href="/upload.html" class="mt-4 inline-block bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform transition hover:-translate-y-1">
+                <i class="fas fa-upload mr-2"></i> Sell Your Code
+            </a>
+        </header>
+
+        <div id="message-container" class="mb-8"></div>
+
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-700">Available Projects</h2>
+            <div class="flex space-x-2">
+                <button id="sort-newest" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                    <i class="fas fa-clock mr-1"></i> Newest
+                </button>
+                <button id="sort-price" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                    <i class="fas fa-dollar-sign mr-1"></i> Price
+                </button>
+            </div>
+        </div>
+
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Projects will be loaded here by JavaScript -->
+            <div class="col-span-full flex justify-center py-12">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p class="text-gray-600">Loading projects...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- "No projects found" placeholder (hidden initially) -->
+        <div id="no-projects" class="hidden py-16 text-center">
+            <i class="fas fa-box-open text-gray-400 text-6xl mb-4"></i>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Projects Available Yet</h3>
+            <p class="text-gray-600 mb-6">Be the first to share your code with the community!</p>
+            <a href="/upload.html" class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition">
+                <i class="fas fa-upload mr-2"></i> Upload Your Project
+            </a>
+        </div>
+
+        <footer class="mt-16 pt-8 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-code text-blue-600 mr-2"></i>
+                        <span class="font-bold text-gray-700">BuyMeACode</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">© 2024 BuyMeACode. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition"><i class="fab fa-twitter text-lg"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition"><i class="fab fa-github text-lg"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition"><i class="fab fa-linkedin text-lg"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition"><i class="fab fa-instagram text-lg"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast notification for copy success -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-24 transition-transform duration-300 flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>Payment link copied to clipboard!</span>
+    </div>
+
+    <script>
+        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // REPLACE with your Publishable Key
+        const projectsGrid = document.getElementById('projects-grid');
+        const messageContainer = document.getElementById('message-container');
+        const noProjectsContainer = document.getElementById('no-projects');
+        const sortNewestBtn = document.getElementById('sort-newest');
+        const sortPriceBtn = document.getElementById('sort-price');
+        const toast = document.getElementById('toast');
+        const MINIMUM_PRICE = 1.00; // Minimum price in USD
+        let allProjects = []; // Store all projects for sorting
+
+        // Check for upload success message
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('uploaded') === 'true') {
+            messageContainer.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow flex items-center" role="alert">
+                    <i class="fas fa-check-circle text-green-500 text-2xl mr-4"></i>
+                    <div>
+                        <p class="font-bold">Success!</p>
+                        <p>Your project has been uploaded and is now available for purchase.</p>
+                    </div>
+                    <button class="ml-auto text-green-700 hover:text-green-900" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            window.history.replaceState({}, document.title, "/");
+        }
+
+        // Show toast notification
+        function showToast() {
+            toast.classList.remove('translate-y-24');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24');
+            }, 3000);
+        }
+
+        // Copy payment link to clipboard
+        async function copyPaymentLink(projectId, amount) {
+            try {
+                // Create a temporary payment link (in a real app, you might want to generate this server-side)
+                const paymentLink = `${window.location.origin}/pay/${projectId}?amount=${amount}`;
+                await navigator.clipboard.writeText(paymentLink);
+                showToast();
+            } catch (err) {
+                console.error('Failed to copy payment link:', err);
+                alert('Failed to copy payment link');
+            }
+        }
+
+        async function fetchProjects() {
+            try {
+                const response = await fetch('/api/projects');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                allProjects = await response.json();
+                displayProjects(allProjects.reverse()); // Default to newest first
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                projectsGrid.innerHTML = '<p class="col-span-full text-center py-12"><i class="fas fa-exclamation-circle text-red-500 text-2xl mb-3"></i><br>Could not load projects. Please try again later.</p>';
+            }
+        }
+
+        function displayProjects(projects) {
+            if (projects.length === 0) {
+                projectsGrid.innerHTML = '';
+                noProjectsContainer.classList.remove('hidden');
+                return;
+            }
+
+            noProjectsContainer.classList.add('hidden');
+            projectsGrid.innerHTML = '';
+            
+            projects.forEach(project => {
+                const projectCard = `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition hover:-translate-y-1 hover:shadow-xl">
+                        <div class="relative">
+                            <div class="h-40 bg-gradient-to-r from-blue-200 to-purple-200 flex justify-center items-center">
+                                <i class="fas fa-code text-white text-6xl opacity-50"></i>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <span class="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full shadow">
+                                    $${project.price ? project.price.toFixed(2) : MINIMUM_PRICE.toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2 truncate">${project.originalZipName.replace(/\.zip$/i, '')}</h3>
+                            <div class="flex items-center mb-3">
+                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(project.developerName)}&background=random" class="w-6 h-6 rounded-full mr-2" alt="${project.developerName}">
+                                <span class="text-sm text-gray-600">${project.developerName}</span>
+                            </div>
+                            <div class="text-sm text-gray-600 mb-4">
+                                <a href="${project.websiteUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center text-blue-500 hover:text-blue-700 transition">
+                                    <i class="fas fa-external-link-alt mr-1"></i> View Live Demo
+                                </a>
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="mb-3">
+                                    <label for="price-${project.id}" class="block text-sm font-medium text-gray-700 mb-1">Your Price (USD):</label>
+                                    <div class="relative rounded-md">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" name="price-${project.id}" id="price-${project.id}"
+                                            class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="5.00" min="${MINIMUM_PRICE.toFixed(2)}" step="0.01" value="${project.price || 5.00}">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Minimum $${MINIMUM_PRICE.toFixed(2)}</p>
+                                </div>
+                                <div class="grid grid-cols-5 gap-2">
+                                    <button data-project-id="${project.id}"
+                                        class="col-span-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition pay-button">
+                                        <i class="fas fa-credit-card mr-1"></i> Pay & Download
+                                    </button>
+                                    <button data-project-id="${project.id}"
+                                        class="copy-link-button bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                projectsGrid.insertAdjacentHTML('beforeend', projectCard);
+            });
+
+            // Payment button event listeners
+            document.querySelectorAll('.pay-button').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const projectId = event.target.dataset.projectId;
+                    const priceInput = document.getElementById(`price-${projectId}`);
+                    const amount = parseFloat(priceInput.value);
+
+                    if (isNaN(amount) || amount < MINIMUM_PRICE) {
+                        alert(`Please enter a valid price (minimum $${MINIMUM_PRICE.toFixed(2)}).`);
+                        priceInput.focus();
+                        return;
+                    }
+
+                    try {
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                        button.disabled = true;
+                        
+                        const response = await fetch(`/create-checkout-session/${projectId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ amount: amount }) // Send the chosen amount
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json(); // Expect JSON error from backend
+                            throw new Error(errorData.error || `Checkout failed: ${response.statusText}`);
+                        }
+                        const session = await response.json();
+                        const result = await stripe.redirectToCheckout({ sessionId: session.id });
+                        if (result.error) {
+                            console.error(result.error.message);
+                            alert("Error redirecting to checkout: " + result.error.message);
+                        }
+                    } catch (error) {
+                        console.error('Error setting up Stripe Checkout:', error);
+                        alert("Could not initiate payment. " + error.message);
+                    } finally {
+                        button.innerHTML = '<i class="fas fa-credit-card mr-1"></i> Pay & Download';
+                        button.disabled = false;
+                    }
+                });
+            });
+
+            // Copy link button event listeners
+            document.querySelectorAll('.copy-link-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const projectId = event.target.closest('button').dataset.projectId;
+                    const priceInput = document.getElementById(`price-${projectId}`);
+                    const amount = parseFloat(priceInput.value);
+
+                    if (isNaN(amount) || amount < MINIMUM_PRICE) {
+                        alert(`Please enter a valid price (minimum $${MINIMUM_PRICE.toFixed(2)}).`);
+                        priceInput.focus();
+                        return;
+                    }
+
+                    copyPaymentLink(projectId, amount);
+                });
+            });
+        }
+
+        // Sort by newest (default)
+        sortNewestBtn.addEventListener('click', () => {
+            sortNewestBtn.classList.add('bg-blue-100', 'border-blue-300');
+            sortPriceBtn.classList.remove('bg-blue-100', 'border-blue-300');
+            displayProjects([...allProjects].reverse());
+        });
+
+        // Sort by price
+        sortPriceBtn.addEventListener('click', () => {
+            sortPriceBtn.classList.add('bg-blue-100', 'border-blue-300');
+            sortNewestBtn.classList.remove('bg-blue-100', 'border-blue-300');
+            displayProjects([...allProjects].sort((a, b) => (a.price || MINIMUM_PRICE) - (b.price || MINIMUM_PRICE)));
+        });
+
+        fetchProjects();
+    </script>
+</body>
+</html>
